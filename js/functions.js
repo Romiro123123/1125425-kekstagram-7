@@ -1,3 +1,5 @@
+/* eslint-disable curly */
+/* eslint-disable radix */
 /* eslint-disable no-console */
 /* eslint-disable semi */
 
