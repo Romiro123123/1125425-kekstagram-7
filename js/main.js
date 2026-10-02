@@ -1,3 +1,4 @@
+/* eslint-disable arrow-body-style */
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable prefer-const */
 /* eslint-disable no-unused-expressions */
@@ -8,79 +9,87 @@
 /* eslint-disable radix */
 /* eslint-disable no-console */
 /* eslint-disable semi */
-const DESCRIPTIONS = [
-  'Прикольная фотография', 'Классная фотография', 'Нормальная фотография',
-  'Чудесная фотография', 'Прелестная фотография', 'Милая фотография'
-];
 
-const MESSAGES = [
-  'Всё отлично!', 
-  'В целом всё неплохо. Но не всё.', 
+const descriptions = [
+  'Сфоткал на курорте', 
+  'Это я на втором курсе', 
+  'Это htmlacademy', 
+  'это моя машина', 
+  'девушка в бикини', 
+  'кукурузник', 
+  'мой завтрак', 
+  'мой обед', 
+  'мой ужин'
+]
+
+const names = [
+  'Кирилл Храмков', 
+  'Илон маск', 
+  'Андрей Гайдулян', 
+  'madk1d', 
+  'Александр ФЛОМастеров', 
+  'Тони старк', 
+  'Фамилий Многозов',
+  'Сидни Суини',
+  '-_-',
+  'Flow Seal'
+]
+
+const message = [
+  'Всё отлично!',
+  'В целом всё неплохо. Но не всё.',
   'Когда вы делаете фотографию, хорошо бы убирать палец из кадра. В конце концов это просто непрофессионально.',
   'Моя бабушка случайно чихнула с фотоаппаратом в руках и у неё получилась фотография лучше.',
   'Я поскользнулся на банановой кожуре и уронил фотоаппарат на кота и у меня получилась фотография лучше.',
   'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!'
-];
-
-const NAMES = ['Артём', 'Игорь', 'Мария', 'Диана', 'Кекс'];
+]
 
 function getRandomInteger (min, max) {
   const lower = Math.ceil(Math.min(Math.abs(min), Math.abs(max)));
   const upper = Math.floor(Math.max(Math.abs(min), Math.abs(max)));
   const result = Math.random() * (upper - lower + 1) + lower;
-
   return Math.floor(result);
 }
 
-function createRandomIdFromRangeGenerator (min, max) {
-  const previousValues = [];
-
-  return function () {
-    let currentValue = getRandomInteger(min, max);
-    if (previousValues.length >= (max - min + 1)) {
-      console.error(`Перебраны все числа из диапазона от ${min} до ${max}`);
-      return null;
-    }
-    while (previousValues.includes(currentValue)) {
-      currentValue = getRandomInteger(min, max);
-    }
-    previousValues.push(currentValue);
-    return currentValue;
+const getUniqeId = () => {
+  let counter = 0;
+  return () => {
+    return ++counter;
   };
 }
 
-const getRandomArrayElement = (elements) => elements[getRandomInteger(0, elements.length - 1)];
+const uniqeId = getUniqeId();
 
-const getRandomCommendId = createRandomIdFromRangeGenerator(1,100000);
+const getRandomElement = (elements) => elements[getRandomInteger(0, elements.length - 1)];
+ 
+const getOneOrTwoMessages = () => {
+  let firstMessage = getRandomElement(message);
+  let secondMessage = firstMessage;
+  if (getRandomInteger(1,2) === 1) return firstMessage;
+  while (secondMessage === firstMessage)
+    secondMessage = getRandomElement(message);
+  return `${firstMessage} ${secondMessage}`;
+}
 
-const createComment = (commentId) => ({
-  id: getRandomCommendId(),
-  avatar: `img/avatar-${getRandomInteger(1,6)}.svg`,
-  message: getRandomArrayElement(MESSAGES),
-  name: getRandomArrayElement(NAMES)
-});
-
-const createObject = (photoId) => {
-  const commentsCount = getRandomInteger(0,30);
-  const commentsArray = [];
-
-  for (let i = 1; i <= commentsCount; i++) 
-    commentsArray.push(createComment(i));
-
+const createComment = () => {
   return {
-    id: photoId,
-    url: `photos/${photoId}.jpg`,
-    description: getRandomArrayElement(DESCRIPTIONS),
-    likes: getRandomInteger(15,200),
-    comments: commentsArray
+    id: uniqeId(),
+    avatar: `img/avatar-${getRandomInteger(1,6)}.svg`,
+    message: getOneOrTwoMessages(),
+    name: getRandomElement(names)
   };
-};
-
-const createPhotos = () => {
-  const photos = [];
-  for (let i = 1; i <= 25; i++)
-    photos.push(createObject(i));
-  return photos;
 }
 
-console.log(JSON.stringify(createPhotos(), null, 2));
+const createPhotoDescription = (id) => {
+  return {
+    id: id,
+    url: `photos/${id}.jpg`,
+    description: getRandomElement(descriptions),
+    likes: getRandomInteger(15,200),
+    comments: Array.from({length: getRandomInteger(0,30)}, createComment)
+  };
+}
+
+const photoDescriptions = Array.from({length: 25}, (_, index) => createPhotoDescription(index + 1));
+
+console.log(JSON.stringify(photoDescriptions, null, 2));
